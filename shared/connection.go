@@ -56,6 +56,9 @@ func MongoSession(opts MongoSessionOpts) *mgo.Session {
 		return nil
 	}
 
+	// Allow mongo exporter to talk to secondary before login. Otherwise, cannot login
+	session.SetMode(mgo.Eventual, true)
+
 	if cred != nil {
 		if err := session.Login(cred); err != nil {
 			glog.Errorf("Cannot login to server using TLS credential: %s", err)
@@ -63,7 +66,6 @@ func MongoSession(opts MongoSessionOpts) *mgo.Session {
 		}
 	}
 
-	session.SetMode(mgo.Eventual, true)
 	session.SetSyncTimeout(syncMongodbTimeout)
 	session.SetSocketTimeout(opts.SocketTimeout)
 	return session
